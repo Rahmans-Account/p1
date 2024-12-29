@@ -7,12 +7,56 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             text-align: center;
-            margin-top: 50px;
+            background: #f4f4f9;
+        }
+        h1 {
+            color: #333;
+            margin-top: 30px;
+        }
+        form {
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         input, button {
             margin: 10px;
             padding: 10px;
+            font-size: 16px;
+            width: 80%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #5cb85c;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #4cae4c;
+        }
+        #result {
+            margin: 20px auto;
+            padding: 20px;
+            background: #e7f3e7;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #result h2 {
+            margin: 0 0 10px;
+            color: #3c763d;
+        }
+        #result p {
+            margin: 5px 0;
             font-size: 16px;
         }
     </style>
@@ -20,18 +64,23 @@
 <body>
     <h1>Attendance Calculator</h1>
     <form id="attendanceForm">
-        <label for="startDate">Start of Semester:</label>
+        <label for="startDate">Start of Semester:</label><br>
         <input type="date" id="startDate" required><br>
         
-        <label for="endDate">End of Semester:</label>
+        <label for="endDate">End of Semester:</label><br>
         <input type="date" id="endDate" required><br>
         
-        <label for="currentAttendance">Current Attendance (%):</label>
+        <label for="currentAttendance">Current Attendance (%):</label><br>
         <input type="number" id="currentAttendance" min="0" max="100" required><br>
         
         <button type="button" onclick="calculateAttendance()">Calculate</button>
     </form>
-    <h2 id="result"></h2>
+    <div id="result" style="display: none;">
+        <h2>Results</h2>
+        <p id="remainingWeeks"></p>
+        <p id="classesNeeded"></p>
+        <p id="weeklyClasses"></p>
+    </div>
 
     <script>
         function calculateAttendance() {
@@ -40,13 +89,13 @@
             const currentAttendance = parseFloat(document.getElementById('currentAttendance').value);
 
             if (isNaN(startDate) || isNaN(endDate) || isNaN(currentAttendance)) {
-                document.getElementById('result').textContent = "Please fill out all fields correctly!";
+                alert("Please fill out all fields correctly!");
                 return;
             }
 
             const today = new Date();
             if (today > endDate) {
-                document.getElementById('result').textContent = "The semester has already ended!";
+                alert("The semester has already ended!");
                 return;
             }
 
@@ -54,18 +103,21 @@
             const daysElapsed = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24));
             const daysRemaining = totalDays - daysElapsed;
 
-            // Total classes in the semester
+            // Total classes and weeks
             const totalClasses = Math.floor(totalDays / 7) * (5 * 7) + Math.min((totalDays % 7) * 7, 35);
             const classesElapsed = Math.floor(daysElapsed / 7) * (5 * 7) + Math.min((daysElapsed % 7) * 7, 35);
             const attendedClasses = (currentAttendance / 100) * classesElapsed;
             const requiredClasses = 0.75 * totalClasses;
 
-            if (attendedClasses >= requiredClasses) {
-                document.getElementById('result').textContent = "You're already maintaining 75% attendance!";
-            } else {
-                const classesNeeded = Math.ceil(requiredClasses - attendedClasses);
-                document.getElementById('result').textContent = `You need to attend at least ${classesNeeded} more classes to reach 75% attendance.`;
-            }
+            const weeksRemaining = Math.ceil(daysRemaining / 7);
+            const classesNeeded = Math.max(0, Math.ceil(requiredClasses - attendedClasses));
+            const weeklyClasses = Math.ceil(classesNeeded / weeksRemaining);
+
+            // Display results
+            document.getElementById('result').style.display = "block";
+            document.getElementById('remainingWeeks').textContent = `Weeks left in the semester: ${weeksRemaining}`;
+            document.getElementById('classesNeeded').textContent = `Total classes needed to reach 75% attendance: ${classesNeeded}`;
+            document.getElementById('weeklyClasses').textContent = `You need to attend ${weeklyClasses} classes per week to achieve 75%.`;
         }
     </script>
 </body>
