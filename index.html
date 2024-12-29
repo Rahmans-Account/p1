@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Attendance Calculator</h1>
+    <form id="attendanceForm">
+        <label for="startDate">Start of Semester:</label>
+        <input type="date" id="startDate" required><br>
+        
+        <label for="endDate">End of Semester:</label>
+        <input type="date" id="endDate" required><br>
+        
+        <label for="currentAttendance">Current Attendance (%):</label>
+        <input type="number" id="currentAttendance" min="0" max="100" required><br>
+        
+        <button type="button" onclick="calculateAttendance()">Calculate</button>
+    </form>
+    <h2 id="result"></h2>
+
+    <script>
+        function calculateAttendance() {
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            const currentAttendance = parseFloat(document.getElementById('currentAttendance').value);
+
+            if (isNaN(startDate) || isNaN(endDate) || isNaN(currentAttendance)) {
+                document.getElementById('result').textContent = "Please fill out all fields correctly!";
+                return;
+            }
+
+            const today = new Date();
+            if (today > endDate) {
+                document.getElementById('result').textContent = "The semester has already ended!";
+                return;
+            }
+
+            const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const daysElapsed = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24));
+            const daysRemaining = totalDays - daysElapsed;
+
+            // Total classes in the semester
+            const totalClasses = Math.floor(totalDays / 7) * (5 * 7) + Math.min((totalDays % 7) * 7, 35);
+            const classesElapsed = Math.floor(daysElapsed / 7) * (5 * 7) + Math.min((daysElapsed % 7) * 7, 35);
+            const attendedClasses = (currentAttendance / 100) * classesElapsed;
+            const requiredClasses = 0.75 * totalClasses;
+
+            if (attendedClasses >= requiredClasses) {
+                document.getElementById('result').textContent = "You're already maintaining 75% attendance!";
+            } else {
+                const classesNeeded = Math.ceil(requiredClasses - attendedClasses);
+                document.getElementById('result').textContent = `You need to attend at least ${classesNeeded} more classes to reach 75% attendance.`;
+            }
+        }
+    </script>
+</body>
+</html>
